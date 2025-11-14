@@ -93,6 +93,25 @@ class ContractStructureOptimizer:
         Returns:
             Dictionary with NPV analysis
         """
+        # Validate inputs
+        if contract.total_value < 0:
+            raise ValueError("Contract total_value must be non-negative")
+
+        if contract.years <= 0:
+            return {
+                'stated_value': contract.total_value,
+                'npv': 0.0,
+                'deferral_discount': 0.0,
+                'discount_from_stated': 0.0,
+                'discount_pct': 0.0,
+                'stated_aav': 0.0,
+                'effective_aav': 0.0,
+                'cbt_aav': 0.0,
+                'cbt_savings_per_year': 0.0,
+                'discount_rate_used': discount_rate if discount_rate is not None else self.discount_rate,
+                'pv_breakdown': {'non_deferred': 0.0, 'deferred': 0.0}
+            }
+
         rate = discount_rate if discount_rate is not None else self.discount_rate
 
         # Annual salary without deferrals
@@ -131,12 +150,20 @@ class ContractStructureOptimizer:
         # Calculate luxury tax value (CBT = NPV for deferred contracts)
         cbt_aav = total_npv / contract.years
 
+        # Calculate effective AAV (NPV-based AAV)
+        effective_aav = total_npv / contract.years
+
+        # Deferral discount is the difference between stated and NPV
+        deferral_discount = contract.total_value - total_npv
+
         return {
             'stated_value': contract.total_value,
             'npv': round(total_npv, 2),
-            'discount_from_stated': round(contract.total_value - total_npv, 2),
-            'discount_pct': round((1 - total_npv / contract.total_value) * 100, 1),
+            'deferral_discount': round(deferral_discount, 2),
+            'discount_from_stated': round(deferral_discount, 2),  # Keep for backward compat
+            'discount_pct': round((1 - total_npv / contract.total_value) * 100, 1) if contract.total_value > 0 else 0,
             'stated_aav': round(contract.aav, 2),
+            'effective_aav': round(effective_aav, 2),
             'cbt_aav': round(cbt_aav, 2),
             'cbt_savings_per_year': round(contract.aav - cbt_aav, 2),
             'discount_rate_used': rate,
@@ -145,6 +172,51 @@ class ContractStructureOptimizer:
                 'deferred': round(pv_deferred, 2)
             }
         }
+
+    def value_opt_out_clause(
+        self,
+        contract: ContractStructure,
+        current_war: float,
+        position: str,
+        current_age: int,
+        dollars_per_war: float = 8.0,
+        n_simulations: int = 10000,
+        war_std: float = 1.5,
+        market_inflation: float = 0.05,
+        injury_rate: float = 0.15
+    ) -> Dict:
+        """
+        Value opt-out clause (wrapper for simulate_opt_out_value with test-friendly interface).
+
+        Args:
+            contract: Contract structure
+            current_war: Current WAR
+            position: Position code
+            current_age: Current age
+            dollars_per_war: Market $/WAR rate
+            n_simulations: Number of simulations
+            war_std: WAR standard deviation
+            market_inflation: Market inflation rate
+            injury_rate: Injury probability
+
+        Returns:
+            Dictionary with opt-out analysis including expected_value_to_team
+        """
+        result = self.simulate_opt_out_value(
+            contract, current_war, current_age, position,
+            dollars_per_war, n_simulations, war_std, market_inflation, injury_rate
+        )
+
+        # Add expected_value_to_team and expected_years_played for test compatibility
+        if 'error' not in result:
+            # Expected value to team = years controlled * AAV
+            result['expected_value_to_team'] = round(
+                result['expected_years_controlled'] * contract.aav, 2
+            )
+            # Alias for test compatibility
+            result['expected_years_played'] = result['expected_years_controlled']
+
+        return result
 
     def simulate_opt_out_value(
         self,
@@ -471,6 +543,122 @@ class ContractStructureOptimizer:
             })
 
         return pd.DataFrame(comparison_data)
+
+    def value_incentives(
+        self,
+        base_salary: float,
+        incentive_structure: Dict,
+        historical_achievement_rate: float = 0.5
+    ) -> Dict:
+        """
+        Calculate expected value of performance incentives.
+
+        Args:
+            base_salary: Base salary in millions
+            incentive_structure: Dict of incentive types and bonuses
+            historical_achievement_rate: Historical probability of achieving bonuses
+
+        Returns:
+            Dictionary with incentive valuation
+        """
+        total_possible_incentives = 0.0
+        expected_incentive_value = 0.0
+
+        for incentive_type, details in incentive_structure.items():
+            bonus = details.get('bonus', 0.0)
+            # Use threshold-based probability if available, otherwise use historical rate
+            prob = details.get('probability', historical_achievement_rate)
+
+            total_possible_incentives += bonus
+            expected_incentive_value += bonus * prob
+
+        return {
+            'base_salary': base_salary,
+            'total_possible_incentives': round(total_possible_incentives, 2),
+            'expected_incentive_value': round(expected_incentive_value, 2),
+            'total_expected_value': round(base_salary + expected_incentive_value, 2),
+            'incentive_achievement_rate': historical_achievement_rate
+        }
+
+    def calculate_risk_adjusted_value(
+        self,
+        contract: ContractStructure,
+        injury_risk_score: float,
+        performance_volatility: float = 0.10
+    ) -> Dict:
+        """
+        Calculate risk-adjusted contract value based on injury and performance risk.
+
+        Args:
+            contract: Contract structure
+            injury_risk_score: Injury risk score (0-100)
+            performance_volatility: Performance volatility (0-1)
+
+        Returns:
+            Dictionary with risk-adjusted valuations
+        """
+        # Calculate injury risk discount
+        if injury_risk_score < 20:  # Low risk
+            injury_discount_pct = 0.0
+        elif injury_risk_score < 40:  # Moderate risk
+            injury_discount_pct = 0.10
+        elif injury_risk_score < 60:  # High risk
+            injury_discount_pct = 0.25
+        else:  # Very high risk (60+)
+            injury_discount_pct = 0.40
+
+        # Calculate performance volatility discount
+        # Higher volatility = more risk = larger discount
+        volatility_discount_pct = min(performance_volatility * 0.5, 0.20)  # Cap at 20%
+
+        # Combined risk discount (multiplicative)
+        total_discount_pct = injury_discount_pct + volatility_discount_pct
+        total_discount_pct = min(total_discount_pct, 0.50)  # Cap at 50%
+
+        risk_discount = contract.total_value * total_discount_pct
+        adjusted_value = contract.total_value * (1 - total_discount_pct)
+
+        return {
+            'stated_value': contract.total_value,
+            'injury_risk_score': injury_risk_score,
+            'injury_discount_pct': round(injury_discount_pct * 100, 1),
+            'performance_volatility': performance_volatility,
+            'volatility_discount_pct': round(volatility_discount_pct * 100, 1),
+            'total_risk_discount_pct': round(total_discount_pct * 100, 1),
+            'risk_discount': round(risk_discount, 2),
+            'adjusted_value': round(adjusted_value, 2),
+            'adjusted_aav': round(adjusted_value / contract.years, 2)
+        }
+
+    def compare_structures(
+        self,
+        structures,
+        player_name: str = "Player",
+        current_war: float = 3.0,
+        age: int = 30,
+        position: str = 'OF'
+    ) -> pd.DataFrame:
+        """
+        Compare multiple contract structures (wrapper for compare_contract_structures).
+
+        Args:
+            structures: List of ContractStructure objects or List of (name, ContractStructure) tuples
+            player_name: Player name
+            current_war: Current WAR
+            age: Current age
+            position: Position
+
+        Returns:
+            DataFrame comparing all structures
+        """
+        # Handle both list of contracts and list of tuples
+        if structures and not isinstance(structures[0], tuple):
+            # Convert to tuples if just a list of ContractStructure objects
+            structures = [(f"Structure {i+1}", s) for i, s in enumerate(structures)]
+
+        return self.compare_contract_structures(
+            player_name, structures, current_war, age, position
+        )
 
     def generate_ohtani_style_contract(
         self,

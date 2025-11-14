@@ -123,9 +123,12 @@ class InjuryRiskAnalyzer:
                     risk_factors.append(f"Moderate K% decline {k_trend:.1f}%")
 
             # Factor 4: Age (35+ = elevated baseline risk)
-            age = pitcher.get('age_2025', 30)
-            if age >= 35:
-                risk_score += 15
+            age = pitcher.get('Age', pitcher.get('age_2025', 30))
+            if age >= 40:
+                risk_score += 20
+                risk_factors.append(f"Age {age}")
+            elif age >= 35:
+                risk_score += 20
                 risk_factors.append(f"Age {age}")
             elif age >= 33:
                 risk_score += 8
@@ -187,7 +190,7 @@ class InjuryRiskAnalyzer:
                     risk_factors.append(f"Moderate exit velo decline {ev_trend:.1f} mph")
 
             # Factor 2: Sprint speed decline (soft tissue risk indicator)
-            speed_trend = batter.get('sprint_speed_trend_fps', 0)
+            speed_trend = batter.get('sprint_speed_decline_fps', batter.get('sprint_speed_trend_fps', 0))
             if pd.notna(speed_trend):
                 if speed_trend <= self.risk_thresholds['batter_sprint_speed_decline_fps']:
                     risk_score += 20
@@ -207,8 +210,8 @@ class InjuryRiskAnalyzer:
                     risk_factors.append(f"Moderate barrel decline {barrel_trend:.1f}%")
 
             # Factor 4: Age (33+ = elevated risk for position players)
-            age = batter.get('age_2025', 30)
-            if age >= 35:
+            age = batter.get('Age', batter.get('age_2025', 30))
+            if age >= 36:
                 risk_score += 15
                 risk_factors.append(f"Age {age}")
             elif age >= 33:
@@ -229,6 +232,48 @@ class InjuryRiskAnalyzer:
             result['injury_risk_score'],
             bins=[-1, 20, 40, 60, 100],
             labels=['Low', 'Moderate', 'High', 'Very High']
+        )
+
+        return result
+
+    def apply_injury_risk_discount(
+        self,
+        player_data: pd.DataFrame
+    ) -> pd.DataFrame:
+        """
+        Apply injury risk discount to contract values.
+
+        Args:
+            player_data: DataFrame with injury_risk_score and base_contract_value_millions columns
+
+        Returns:
+            DataFrame with injury_adjusted_value_millions column added
+        """
+        result = player_data.copy()
+
+        # Ensure we have necessary columns
+        if 'base_contract_value_millions' not in result.columns:
+            raise ValueError("DataFrame must have 'base_contract_value_millions' column")
+
+        if 'injury_risk_score' not in result.columns:
+            raise ValueError("DataFrame must have 'injury_risk_score' column")
+
+        # Calculate discount percentage based on risk score
+        def calculate_discount(risk_score):
+            if risk_score < 20:  # Low risk
+                return 0.0
+            elif risk_score < 40:  # Moderate risk
+                return 0.10
+            elif risk_score < 60:  # High risk
+                return 0.25
+            else:  # Very High risk (60+)
+                return 0.40
+
+        result['injury_discount_pct'] = result['injury_risk_score'].apply(calculate_discount)
+
+        # Apply discount to contract value
+        result['injury_adjusted_value_millions'] = (
+            result['base_contract_value_millions'] * (1 - result['injury_discount_pct'])
         )
 
         return result

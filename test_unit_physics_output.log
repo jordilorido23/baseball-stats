@@ -1,0 +1,164 @@
+/Users/jordilorido/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+
+================================================================================
+ADVANCED RELIEVER ANALYSIS - UNIT TESTS
+Testing with Clay Holmes (2024 season - Yankees closer)
+================================================================================
+
+================================================================================
+TEST 1.1: Fetch Statcast Data
+================================================================================
+
+Fetching data for Clay Holmes (player 605280) (2024-03-01 to 2024-10-01)...
+  Loaded 1184 pitches
+  ✅ Fetch Statcast Data - Got pitches
+  ✅ Required field: vx0 (1182 values)
+  ✅ Required field: vy0 (1182 values)
+  ✅ Required field: vz0 (1182 values)
+  ✅ Required field: ax (1182 values)
+  ✅ Required field: ay (1182 values)
+  ✅ Required field: az (1182 values)
+  ✅ Required field: pfx_x (1182 values)
+  ✅ Required field: pfx_z (1182 values)
+  ✅ Required field: release_spin_rate (1181 values)
+  ✅ Required field: spin_axis (1181 values)
+  ✅ Required field: release_speed (1182 values)
+  ✅ Required field: release_extension (1182 values)
+  ✅ Required field: plate_x (1182 values)
+  ✅ Required field: plate_z (1182 values)
+  ✅ Required field: pitch_type (1182 values)
+  ✅ Required field: release_pos_x (1182 values)
+  ✅ Required field: release_pos_z (1182 values)
+
+  Available columns (118):
+    pitch_type, game_date, release_speed, release_pos_x, release_pos_z, player_name, batter, pitcher, events, description, spin_dir, spin_rate_deprecated, break_angle_deprecated, break_length_deprecated, zone, des, game_type, stand, p_throws, home_team...
+
+================================================================================
+TEST 1.2: VAA Calculation
+================================================================================
+
+Testing VAA calculation on 10 pitches...
+  Pitch 1: VAA = NaN (missing data)
+  Pitch 2: VAA = NaN (missing data)
+  Pitch 3: VAA = NaN (missing data)
+  Pitch 4: VAA = NaN (missing data)
+  Pitch 5: VAA = NaN (missing data)
+  Pitch 6: VAA = NaN (missing data)
+  Pitch 7: VAA = NaN (missing data)
+  Pitch 8: VAA = NaN (missing data)
+  Pitch 9: VAA = NaN (missing data)
+  Pitch 10: VAA = NaN (missing data)
+  ❌ VAA Calculation: All VAA values are NaN - calculation not working
+
+================================================================================
+TEST 1.3: SSW (Seam-Shifted Wake) Detection
+================================================================================
+
+Testing SSW calculation on 10 pitches...
+  Pitch 1: SSW = 51.49 inches (x: -30.00, z: -41.85)
+  Pitch 2: SSW = 46.89 inches (x: -21.13, z: -41.86)
+  Pitch 3: SSW = 38.56 inches (x: 25.12, z: 29.26)
+  Pitch 4: SSW = 49.53 inches (x: -27.49, z: -41.19)
+  Pitch 5: SSW = 52.28 inches (x: -29.70, z: -43.02)
+  Pitch 6: SSW = 38.11 inches (x: 27.51, z: 26.38)
+  Pitch 7: SSW = 37.00 inches (x: 21.91, z: 29.81)
+  Pitch 8: SSW = 37.17 inches (x: 27.24, z: 25.30)
+  Pitch 9: SSW = 40.94 inches (x: 24.01, z: 33.16)
+  Pitch 10: SSW = 39.18 inches (x: 25.68, z: 29.59)
+  ✅ SSW Detection - 10/10 valid values
+
+  Average SSW: 43.12 inches
+  ❌ SSW values reasonable: Average SSW 43.12 inches outside expected range (0-15)
+
+================================================================================
+TEST 1.4: Full Physics Analysis
+================================================================================
+
+Running complete physics analysis for Clay Holmes (player 605280)...
+  ✅ Full Physics Analysis - Completed without errors
+
+  Results:
+    VAA_FB_avg: nan
+  ✅ Physics metric present: VAA_FB_avg
+    SSW_Movement_FB: 38.54595961369937
+  ✅ Physics metric present: SSW_Movement_FB
+    Tunneling_Score: 73.71646449745131
+  ✅ Physics metric present: Tunneling_Score
+    VAA_Zone_Mismatch_Score: nan
+  ✅ Physics metric present: VAA_Zone_Mismatch_Score
+
+================================================================================
+TEST 1.5: Arsenal Synergy Analysis
+================================================================================
+
+Analyzing arsenal for Clay Holmes...
+Analyzing arsenal synergy for Hunter Harvey...
+  ✅ Arsenal Synergy - Completed without errors
+
+  Results:
+    Has_Gyro_Sweeper_Combo: False
+  ✅ Arsenal metric present: Has_Gyro_Sweeper_Combo
+    Arsenal_Completeness: 45.523862162680274
+  ✅ Arsenal metric present: Arsenal_Completeness
+    Effective_Velocity_Composite: 91.59069373942471
+  ✅ Arsenal metric present: Effective_Velocity_Composite
+    Cognitive_Load_Score: 56.22822652496148
+  ✅ Arsenal metric present: Cognitive_Load_Score
+    Nash_Equilibrium_Score: 51.02380562219494
+  ✅ Arsenal metric present: Nash_Equilibrium_Score
+
+================================================================================
+TEST 1.6: Biomechanics Analysis
+================================================================================
+
+Analyzing biomechanics for Clay Holmes...
+Analyzing biomechanics for Hunter Harvey...
+  ✅ Biomechanics - Completed without errors
+
+  Results:
+    Release_Point_SD: 2.5005768586199357
+  ✅ Biomechanics metric present: Release_Point_SD
+    Release_Strategy_Classification: Consistency
+  ✅ Biomechanics metric present: Release_Strategy_Classification
+    Fatigue_Units_Total: 1591.9999999999998
+  ✅ Biomechanics metric present: Fatigue_Units_Total
+    FU_Risk_Score: 4.540540540540537
+  ✅ Biomechanics metric present: FU_Risk_Score
+    Extension_ft: 5.952538071065989
+  ✅ Biomechanics metric present: Extension_ft
+    Durability_Score: 82.76436843106391
+  ✅ Biomechanics metric present: Durability_Score
+
+================================================================================
+TEST 1.7: Diamond Score Calculation
+================================================================================
+
+Calculating Diamond Score...
+  ❌ Diamond Score: analyze_reliever_complete() got an unexpected keyword argument 'physics_results'
+
+================================================================================
+TEST SUMMARY
+================================================================================
+Total Tests: 40
+Passed: 37 (92.5%)
+Failed: 3 (7.5%)
+
+================================================================================
+FAILED TESTS - DETAILS
+================================================================================
+
+VAA Calculation:
+  Error: All VAA values are NaN - calculation not working
+
+SSW values reasonable:
+  Error: Average SSW 43.12 inches outside expected range (0-15)
+
+Diamond Score:
+  Error: analyze_reliever_complete() got an unexpected keyword argument 'physics_results'
+
+================================================================================
+RECOMMENDATION
+================================================================================
+✅ PROCEED TO PHASE 2 (Integration Tests)
+   Most tests passed. Code is ready for multi-pitcher testing.
