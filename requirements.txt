@@ -49,3 +49,7 @@ lightgbm>=4.0.0
 pytest>=7.4.0
 pytest-cov>=4.1.0
 pytest-mock>=3.11.0
+
+# Enhanced Data Integration (Added Nov 2025)
+fuzzywuzzy>=0.18.0  # Fuzzy string matching for player names
+python-Levenshtein>=0.21.0  # Faster fuzzy matching backend

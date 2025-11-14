@@ -25,6 +25,12 @@ from .breakout_detector import BreakoutDetector
 from .free_agent_analyzer import FreeAgentAnalyzer
 from .aging_curves import AgingCurveAnalyzer
 
+# New deep FA analysis modules (2025-26 analysis)
+from .injury_risk_analyzer import InjuryRiskAnalyzer
+from .discipline_sustainability import DisciplineSustainabilityAnalyzer
+from .organizational_effects import OrganizationalEffectsAnalyzer
+from .contract_structure_optimizer import ContractStructureOptimizer, ContractStructure
+
 # Player similarity
 try:
     from .player_similarity import PlayerSimilarityFinder
@@ -80,6 +86,12 @@ __all__ = [
     'BreakoutDetector',
     'FreeAgentAnalyzer',
     'AgingCurveAnalyzer',
+    # Deep FA Analysis (2025-26)
+    'InjuryRiskAnalyzer',
+    'DisciplineSustainabilityAnalyzer',
+    'OrganizationalEffectsAnalyzer',
+    'ContractStructureOptimizer',
+    'ContractStructure',
     # Player Comparison
     'PlayerSimilarityFinder',
     'PitchArsenalClusterer',
