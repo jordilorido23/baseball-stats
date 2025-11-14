@@ -1,0 +1,51 @@
+# Core data science libraries
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Baseball data sources
+pybaseball>=2.2.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.14.0
+
+# Statistical analysis and ML
+scikit-learn>=1.3.0
+statsmodels>=0.14.0
+scipy>=1.10.0
+
+# Jupyter notebooks
+jupyter>=1.0.0
+ipykernel>=6.22.0
+ipywidgets>=8.0.0
+
+# Data validation and utilities
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# Progress bars for long operations
+tqdm>=4.65.0
+
+# Bayesian modeling and MCMC
+pymc>=5.10.0
+arviz>=0.17.0
+pytensor>=2.18.0
+
+# Survival analysis
+lifelines>=0.28.0
+
+# Causal inference (already have statsmodels above)
+
+# Time-series forecasting
+prophet>=1.1.0
+
+# Gradient boosting (optional but recommended for ensemble models)
+xgboost>=2.0.0
+lightgbm>=4.0.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.0
